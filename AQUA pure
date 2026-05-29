@@ -1,0 +1,327 @@
+// AquaPure Premium RO Water Purifier Website
+// Full React implementation with Admin Dashboard
+import { useState, useEffect, useRef, useCallback } from "react";
+
+// ── Fonts ──────────────────────────────────────────────────────────────────
+const FontLink = () => (
+  <style>{`
+    @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@300;400&display=swap');
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --white: #ffffff;
+      --off-white: #f8fafc;
+      --glass: rgba(255,255,255,0.72);
+      --glass-border: rgba(255,255,255,0.45);
+      --blue-50: #eff8ff;
+      --blue-100: #dbeeff;
+      --blue-200: #b8ddff;
+      --blue-400: #60aff5;
+      --blue-500: #2d96f0;
+      --blue-600: #1479d4;
+      --blue-700: #0e5faa;
+      --slate-100: #f1f5f9;
+      --slate-200: #e2e8f0;
+      --slate-400: #94a3b8;
+      --slate-500: #64748b;
+      --slate-600: #475569;
+      --slate-700: #334155;
+      --slate-800: #1e293b;
+      --slate-900: #0f172a;
+      --shadow-sm: 0 1px 3px rgba(14,95,170,0.07), 0 1px 2px rgba(14,95,170,0.05);
+      --shadow-md: 0 4px 20px rgba(14,95,170,0.10), 0 2px 8px rgba(14,95,170,0.07);
+      --shadow-lg: 0 12px 40px rgba(14,95,170,0.13), 0 4px 16px rgba(14,95,170,0.08);
+      --shadow-xl: 0 24px 60px rgba(14,95,170,0.18), 0 8px 24px rgba(14,95,170,0.10);
+      --radius: 16px;
+      --radius-lg: 24px;
+      --radius-xl: 32px;
+      --font-display: 'Cormorant Garamond', Georgia, serif;
+      --font-body: 'DM Sans', system-ui, sans-serif;
+      --font-mono: 'DM Mono', monospace;
+      --transition: 0.35s cubic-bezier(0.4,0,0.2,1);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: var(--font-body);
+      background: var(--white);
+      color: var(--slate-800);
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: var(--slate-100); }
+    ::-webkit-scrollbar-thumb { background: var(--blue-400); border-radius: 99px; }
+
+    /* Animations */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(28px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; } to { opacity: 1; }
+    }
+    @keyframes float {
+      0%, 100% { transform: translateY(0px) rotate(0deg); }
+      33%       { transform: translateY(-14px) rotate(1.5deg); }
+      66%       { transform: translateY(-6px) rotate(-1deg); }
+    }
+    @keyframes ripple {
+      0%   { transform: scale(0); opacity: 0.6; }
+      100% { transform: scale(4); opacity: 0; }
+    }
+    @keyframes wave {
+      0%   { transform: translateX(0) scaleY(1); }
+      50%  { transform: translateX(-25%) scaleY(0.85); }
+      100% { transform: translateX(-50%) scaleY(1); }
+    }
+    @keyframes shimmer {
+      0%   { background-position: -200% center; }
+      100% { background-position: 200% center; }
+    }
+    @keyframes pulse-ring {
+      0%   { transform: scale(1); opacity: 0.6; }
+      100% { transform: scale(1.6); opacity: 0; }
+    }
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateX(40px); }
+      to   { opacity: 1; transform: translateX(0); }
+    }
+    @keyframes dropIn {
+      from { opacity: 0; transform: translateY(-16px) scale(0.97); }
+      to   { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .animate-fadeUp   { animation: fadeUp 0.7s ease both; }
+    .animate-fadeIn   { animation: fadeIn 0.5s ease both; }
+    .animate-float    { animation: float 7s ease-in-out infinite; }
+    .animate-slideIn  { animation: slideIn 0.5s ease both; }
+
+    /* Glass card */
+    .glass {
+      background: var(--glass);
+      backdrop-filter: blur(18px) saturate(180%);
+      -webkit-backdrop-filter: blur(18px) saturate(180%);
+      border: 1px solid var(--glass-border);
+    }
+
+    /* Gradient text */
+    .gradient-text {
+      background: linear-gradient(135deg, var(--blue-600) 0%, var(--blue-400) 60%, #7dd3fc 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    /* Shimmer button */
+    .btn-shimmer {
+      background: linear-gradient(90deg, var(--blue-600) 0%, var(--blue-400) 40%, #a8d8f8 60%, var(--blue-600) 100%);
+      background-size: 200% auto;
+      animation: shimmer 2.5s linear infinite;
+    }
+
+    /* Nav */
+    .nav-blur {
+      background: rgba(255,255,255,0.88);
+      backdrop-filter: blur(20px) saturate(200%);
+      -webkit-backdrop-filter: blur(20px) saturate(200%);
+      border-bottom: 1px solid rgba(96,175,245,0.15);
+    }
+
+    /* Wave SVG */
+    .wave-container { overflow: hidden; line-height: 0; }
+
+    /* Ripple on hover */
+    .ripple-btn {
+      position: relative;
+      overflow: hidden;
+    }
+    .ripple-btn::after {
+      content: '';
+      position: absolute;
+      inset: 50% auto auto 50%;
+      width: 60px; height: 60px;
+      margin: -30px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.3);
+      transform: scale(0);
+      opacity: 0;
+      transition: none;
+    }
+    .ripple-btn:active::after {
+      animation: ripple 0.6s ease-out;
+    }
+
+    /* Card hover */
+    .product-card {
+      transition: transform var(--transition), box-shadow var(--transition);
+    }
+    .product-card:hover {
+      transform: translateY(-6px) scale(1.012);
+      box-shadow: var(--shadow-xl);
+    }
+
+    /* Water drop cursor on hero */
+    .water-cursor { cursor: crosshair; }
+
+    /* Testimonial */
+    .star { color: #f59e0b; }
+
+    /* Tag pill */
+    .tag {
+      display: inline-block;
+      padding: 3px 12px;
+      border-radius: 99px;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    /* Admin sidebar */
+    .admin-sidebar {
+      background: linear-gradient(160deg, var(--slate-900) 0%, #0a1628 100%);
+    }
+
+    /* Input */
+    .inp {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1.5px solid var(--slate-200);
+      border-radius: 10px;
+      font-family: var(--font-body);
+      font-size: 14px;
+      color: var(--slate-800);
+      background: white;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      outline: none;
+    }
+    .inp:focus {
+      border-color: var(--blue-400);
+      box-shadow: 0 0 0 3px rgba(96,175,245,0.2);
+    }
+
+    /* Responsive helpers */
+    @media (max-width: 768px) {
+      .hide-mobile { display: none !important; }
+    }
+    @media (min-width: 769px) {
+      .hide-desktop { display: none !important; }
+    }
+  `}</style>
+);
+
+// ── Icons (inline SVG) ─────────────────────────────────────────────────────
+const Icon = {
+  drop: (s=20) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2C6 8 4 12.5 4 15a8 8 0 0016 0c0-2.5-2-7-8-13z"/></svg>,
+  check: (s=16) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>,
+  star: (s=16) => <svg width={s} height={s} viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>,
+  phone: (s=20) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 10.81a19.79 19.79 0 01-3.07-8.72A2 2 0 012.18 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.91 7.09a16 16 0 006 6l.56-.56a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>,
+  wa: (s=22) => <svg width={s} height={s} viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>,
+  menu: (s=22) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>,
+  x: (s=20) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>,
+  shield: (s=20) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>,
+  award: (s=20) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg>,
+  leaf: (s=20) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 8C8 10 5.9 16.17 3.82 22h3.3l1.2-3.5c3.5-1 6.7-4.5 9.68-10.5z"/><path d="M21 2S11 2 9 13"/></svg>,
+  zap: (s=20) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>,
+  plus: (s=18) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>,
+  edit: (s=16) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>,
+  trash: (s=16) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>,
+  upload: (s=18) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0018 9h-1.26A8 8 0 103 16.3"/></svg>,
+  eye: (s=16) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>,
+  map: (s=20) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>,
+  mail: (s=20) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>,
+  home: (s=18) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>,
+  box: (s=18) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg>,
+  msg: (s=18) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>,
+  logout: (s=18) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>,
+  settings: (s=18) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93A10 10 0 013 12a10 10 0 0116.07 7.07m.86-13.14A10 10 0 0121 12a10 10 0 01-1.07 4.5"/></svg>,
+  tag: (s=16) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>,
+};
+
+// ── Seed Data ──────────────────────────────────────────────────────────────
+const SEED_PRODUCTS = [
+  {
+    id: 1, name: "AquaPure Elite 9L", category: "Premium Series",
+    price: 18999, originalPrice: 22999, stock: true, featured: true,
+    discount: 17,
+    description: "The pinnacle of home water purification. Removes 99.9% of impurities with 9-stage RO+UV+UF purification.",
+    features: ["9-Stage Purification","UV+RO+UF","9L Tank","Smart Display","WiFi Alert","Auto Flush"],
+    image: "https://images.unsplash.com/photo-1624298357597-fd92dfbec01d?w=600&q=80",
+    color: "#1479d4",
+  },
+  {
+    id: 2, name: "AquaPure Pro 7L", category: "Home RO",
+    price: 12499, originalPrice: 14999, stock: true, featured: true,
+    discount: 17,
+    description: "Professional-grade purification designed for Indian homes. Crystal-clear, mineral-balanced water every pour.",
+    features: ["7-Stage RO+UV","7L Storage","TDS Controller","Digital Display","Auto Shut-off"],
+    image: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=600&q=80",
+    color: "#0e5faa",
+  },
+  {
+    id: 3, name: "AquaPure Commercial 50L", category: "Commercial RO",
+    price: 45000, originalPrice: 55000, stock: true, featured: false,
+    discount: 18,
+    description: "Built for offices, restaurants, and institutions. 50 LPH commercial-grade RO system with industrial filters.",
+    features: ["50 LPH Output","10-Stage","SS Tank","Auto Backwash","Remote Monitor","NSF Certified"],
+    image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&q=80",
+    color: "#334155",
+  },
+  {
+    id: 4, name: "AquaPure Compact 5L", category: "Budget Series",
+    price: 7499, originalPrice: 9999, stock: true, featured: false,
+    discount: 25,
+    description: "Efficient and affordable. Perfect for apartments and small families. Compact design, zero compromise on purity.",
+    features: ["6-Stage RO","5L Storage","Mineral Cartridge","LED Alerts","1-Year Filter Free"],
+    image: "https://images.unsplash.com/photo-1544411047-c491ac821dba?w=600&q=80",
+    color: "#0e5faa",
+  },
+  {
+    id: 5, name: "AquaPure Grand 12L", category: "Premium Series",
+    price: 24999, originalPrice: 29999, stock: true, featured: true,
+    discount: 17,
+    description: "Our largest residential model. Advanced AI-driven TDS monitoring, voice alerts, and app connectivity.",
+    features: ["12L Grand Tank","AI TDS Monitor","App Connected","Voice Alerts","Copper Boost","12-Stage"],
+    image: "https://images.unsplash.com/photo-1559825481-12a05cc00344?w=600&q=80",
+    color: "#1479d4",
+  },
+  {
+    id: 6, name: "AquaPure Commercial 100L", category: "Commercial RO",
+    price: 78000, originalPrice: 95000, stock: false, featured: false,
+    discount: 18,
+    description: "Industrial-strength purification for hospitals, hotels and large-scale operations. 24×7 continuous operation.",
+    features: ["100 LPH","SS Membrane","Auto Regeneration","SCADA Monitor","FDA Grade","Warranty 5 Yr"],
+    image: "https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=600&q=80",
+    color: "#334155",
+  },
+];
+
+const TESTIMONIALS = [
+  { name:"Priya Sharma", loc:"Mumbai", rating:5, text:"AquaPure Elite changed how we think about water. My kids love the taste and I feel confident about their health. Worth every rupee!", avatar:"PS" },
+  { name:"Rajesh Gupta", loc:"Delhi", rating:5, text:"Installed the Commercial 50L for my restaurant. The water quality improvement was immediately noticed by customers. Professional service too.", avatar:"RG" },
+  { name:"Ananya Iyer", loc:"Bangalore", rating:5, text:"Sleek design, smart features, and truly pure water. The app alerts are genius. Customer support is exceptional — 5 stars!", avatar:"AI" },
+  { name:"Vikram Nair", loc:"Hyderabad", rating:5, text:"Switched from a competitor brand. The difference in taste is remarkable. AquaPure Pro pays for itself in saved bottled water costs.", avatar:"VN" },
+];
+
+const FAQS = [
+  { q:"How often should I service my RO purifier?", a:"We recommend servicing every 6 months. Filter replacement depends on TDS levels and usage — typically annually. Our AMC plans cover all scheduled maintenance." },
+  { q:"What is TDS and why does it matter?", a:"TDS (Total Dissolved Solids) measures mineral content in water. Ideal drinking water TDS is 50–150 ppm. Our purifiers maintain optimal mineral balance using TDS controllers." },
+  { q:"Do you provide installation?", a:"Yes! Free installation by certified technicians within 48 hours of purchase across all major Indian cities. We also offer demo sessions." },
+  { q:"What is your warranty policy?", a:"All products carry 1-year comprehensive warranty. Extend to 3 years with our AquaCare AMC plan, which includes free filter replacements and priority support." },
+  { q:"Can I check water purity levels from my phone?", a:"Our Elite and Grand series feature WiFi-enabled smart monitoring. Check real-time TDS, filter life, and get alerts via our AquaPure app." },
+];
+
+const AMC_PLANS = [
+  { name:"Essential", price:"₹1,499/yr", color:"var(--blue-100)", text:"var(--blue-700)", features:["Annual Filter Replacement","2 Service Visits","Helpline Support","60-Day Priority Response"] },
+  { name:"AquaCare Pro", price:"₹2,999/yr", color:"var(--blue-600)", text:"white", featured:true, features:["2 Filter Replacements","4 Service Visits","24×7 Helpline","30-Day Response","Free Annual Checkup"] },
+  { name:"Elite Protect", price:"₹4,999/yr", color:"var(--slate-800)", text:"white", features:["Unlimited Filter Change","6 Service Visits","Dedicated Manager","Same-Day Response","Annual Sanitization","Parts Warranty"] },
+];
+
+// ── Utility ────────────────────────────────────────────────────────────────
+const fmt = n => "₹" + Number(n).toLocaleString("en-IN");
+const CATEGORIES = ["All","Home RO","Commercial RO","Premium Serie
